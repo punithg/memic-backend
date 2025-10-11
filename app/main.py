@@ -28,6 +28,7 @@ app.include_router(api_router, prefix="/api/v1")
 async def startup_event():
     """Initialize application on startup."""
     print(f"{settings.app_name} v{settings.app_version} started successfully!")
+    print(f"Environment: {settings.app_env}")
 
 
 @app.on_event("shutdown")

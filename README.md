@@ -27,14 +27,11 @@ app/
 - **Environment Configuration** with pydantic-settings
 - **CORS Support** for frontend integration
 
-## Setup Instructions
+## Environment Setup
 
-### Prerequisites
+This application supports multiple environments (dev, uat, prod) with secure configuration management.
 
-- Python 3.14
-- PostgreSQL database
-
-### Installation
+### Quick Start
 
 1. **Clone the repository**
    ```bash
@@ -42,10 +39,15 @@ app/
    cd memic-backend
    ```
 
-2. **Create and activate virtual environment**
+2. **Set up Python environment**
    ```bash
-   python3.14 -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   # Using pyenv (recommended)
+   pyenv install 3.14.0
+   pyenv local 3.14.0
+   
+   # Create virtual environment
+   python -m venv venv
+   source venv/bin/activate
    ```
 
 3. **Install dependencies**
@@ -53,20 +55,44 @@ app/
    pip install -r requirements.txt
    ```
 
-4. **Configure environment variables**
+4. **Configure development environment**
    ```bash
-   cp .env.example .env
-   # Edit .env with your database credentials
+   # Copy environment template
+   cp .env.example .env.dev
+   
+   # Set environment
+   export APP_ENV=dev
+   
+   # Edit .env.dev with your actual values
+   # See docs/ENVIRONMENT_SETUP.md for detailed instructions
    ```
 
-5. **Set up PostgreSQL database**
-   - Create a database named `memic_db`
-   - Update `DATABASE_URL` in `.env` file
-
-6. **Run the application**
+5. **Run the application**
    ```bash
-   uvicorn app.main:app --reload
+   python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
+
+### Environment Configuration
+
+The application uses environment-specific configuration files:
+
+- **Development**: `.env.dev` (local development)
+- **UAT**: `.env.uat` (user acceptance testing)  
+- **Production**: `.env.prod` (production deployment)
+
+**Important Security Notes:**
+- Never commit actual environment files with real secrets
+- Use `.env.example` as a template
+- Production secrets should be stored in Azure Key Vault
+- Set spending limits on development API keys
+
+For detailed setup instructions, see [Environment Setup Guide](docs/ENVIRONMENT_SETUP.md).
+
+### Prerequisites
+
+- **Python 3.14+** (installed via pyenv)
+- **PostgreSQL** (local installation for development)
+- **API Keys** (OpenAI, Stripe, SendGrid - see setup guide)
 
 ### API Endpoints
 
@@ -97,11 +123,16 @@ To add a new feature (e.g., user management):
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:password@localhost/memic_db` |
-| `APP_NAME` | Application name | `Memic Backend` |
-| `APP_VERSION` | Application version | `1.0.0` |
-| `DEBUG` | Debug mode | `false` |
-| `HOST` | Server host | `0.0.0.0` |
-| `PORT` | Server port | `8000` |
+| Variable | Required | Description | Example |
+|----------|----------|-------------|---------|
+| `APP_ENV` | Yes | Environment (dev/uat/prod) | `dev` |
+| `DATABASE_URL` | Yes | PostgreSQL connection string | `postgresql://user:pass@host/db` |
+| `OPENAI_API_KEY` | Yes | OpenAI API key | `sk-...` |
+| `JWT_SECRET_KEY` | Yes | JWT signing key | `random-string` |
+| `ENCRYPTION_KEY` | Yes | Data encryption key | `random-string` |
+| `STRIPE_SECRET_KEY` | No | Stripe API key | `sk_test_...` |
+| `SENDGRID_API_KEY` | No | SendGrid API key | `SG.xxx` |
+| `DEBUG` | No | Debug mode | `true`/`false` |
+| `CORS_ORIGINS` | No | Allowed CORS origins | `*` or `https://domain.com` |
+
+For complete environment variable reference, see [Environment Setup Guide](docs/ENVIRONMENT_SETUP.md).

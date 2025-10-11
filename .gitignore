@@ -29,11 +29,17 @@ env.bak/
 venv.bak/
 
 # Environment Variables
+# Ignore all .env files except .env.example
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.dev
+.env.uat
+.env.prod
+# But allow .env.example to be committed as a template
+!.env.example
 
 # IDE
 .vscode/

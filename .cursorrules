@@ -3,9 +3,11 @@
 ## Code Style Guidelines
 
 ### No Emojis in Codebase
-- Do not use emojis in any code files, comments, or strings
+- STRICTLY NO EMOJIS in any code files, comments, or strings
 - Keep the codebase professional and clean
 - Use clear, descriptive text instead of emojis
+- This applies to ALL files: Python, Markdown, JSON, YAML, etc.
+- Replace emojis with descriptive text (e.g., "Running in DEVELOPMENT mode" not "🔧 Running in DEVELOPMENT mode")
 
 ### Python Code Standards
 - Follow PEP 8 style guidelines
