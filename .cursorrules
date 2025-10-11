@@ -1,0 +1,32 @@
+# Cursor Rules for Memic Backend
+
+## Code Style Guidelines
+
+### No Emojis in Codebase
+- Do not use emojis in any code files, comments, or strings
+- Keep the codebase professional and clean
+- Use clear, descriptive text instead of emojis
+
+### Python Code Standards
+- Follow PEP 8 style guidelines
+- Use type hints where appropriate
+- Write clear docstrings for functions and classes
+- Use meaningful variable and function names
+
+### FastAPI Best Practices
+- Use dependency injection for database sessions
+- Implement proper error handling with HTTPException
+- Use Pydantic models for request/response validation
+- Follow MVC architecture pattern (Controllers → Services → Models → DTOs)
+
+### Project Structure
+- Keep controllers thin (HTTP handling only)
+- Put business logic in services
+- Use DTOs for data validation and serialization
+- Keep models focused on database schema
+
+### Environment and Configuration
+- Use environment variables for configuration
+- Never commit sensitive data to version control
+- Use .env files for local development
+- Document all required environment variables
