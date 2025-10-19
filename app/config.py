@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     jwt_secret_key: Optional[str] = Field(default=None, env="JWT_SECRET_KEY")
     encryption_key: Optional[str] = Field(default=None, env="ENCRYPTION_KEY")
     
+    # JWT Settings
+    jwt_algorithm: str = Field(default="HS256", env="JWT_ALGORITHM")
+    jwt_expiry_hours: int = Field(default=24, env="JWT_EXPIRY_HOURS")
+    
     # Third-party service keys
     stripe_secret_key: Optional[str] = Field(default=None, env="STRIPE_SECRET_KEY")
     sendgrid_api_key: Optional[str] = Field(default=None, env="SENDGRID_API_KEY")
