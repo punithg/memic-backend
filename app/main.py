@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
+from app.database import test_database_connection
 from app.routes.api import router as api_router
 
 # Create FastAPI application
@@ -27,6 +28,8 @@ app.include_router(api_router, prefix="/api/v1")
 @app.on_event("startup")
 async def startup_event():
     """Initialize application on startup."""
+    # Test database connection
+    test_database_connection()
     print(f"{settings.app_name} v{settings.app_version} started successfully!")
     print(f"Environment: {settings.app_env}")
 

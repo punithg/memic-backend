@@ -1,0 +1,315 @@
+# Database Migrations with Alembic
+
+This document explains how to manage database schema changes using Alembic migrations in the Memic Backend project.
+
+## Overview
+
+We use Alembic for database version control and schema migrations. **All database schema changes must be done through Alembic migrations** - never modify the database schema directly.
+
+## Why Alembic?
+
+- Version control for database schema
+- Safe, reversible migrations
+- Team collaboration without conflicts
+- Automated migration generation from model changes
+- Production-ready rollback capabilities
+
+## Quick Reference
+
+### Common Commands
+
+```bash
+# Check current migration version
+alembic current
+
+# Show migration history
+alembic history --verbose
+
+# Generate a new migration from model changes
+alembic revision --autogenerate -m "description of changes"
+
+# Apply all pending migrations
+alembic upgrade head
+
+# Rollback last migration
+alembic downgrade -1
+
+# Rollback to a specific version
+alembic downgrade <revision_id>
+```
+
+## Workflow: Making Database Changes
+
+### Step 1: Modify or Create Models
+
+Create or modify SQLAlchemy models in `app/models/`:
+
+```python
+# app/models/user.py
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.sql import func
+from app.database import Base
+
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+```
+
+### Step 2: Import Model
+
+Make sure your model is imported in `app/models/__init__.py`:
+
+```python
+# app/models/__init__.py
+from app.models.user import User
+
+__all__ = ["User"]
+```
+
+### Step 3: Generate Migration
+
+```bash
+alembic revision --autogenerate -m "add user model"
+```
+
+This creates a new migration file in `alembic/versions/`.
+
+### Step 4: Review Migration
+
+**ALWAYS review the generated migration file** before applying it:
+
+```python
+# alembic/versions/xxxx_add_user_model.py
+def upgrade() -> None:
+    op.create_table('users',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('email', sa.String(), nullable=False),
+        sa.Column('username', sa.String(), nullable=False),
+        sa.Column('hashed_password', sa.String(), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+        sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+    op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
+    op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
+
+def downgrade() -> None:
+    op.drop_index(op.f('ix_users_username'), table_name='users')
+    op.drop_index(op.f('ix_users_id'), table_name='users')
+    op.drop_index(op.f('ix_users_email'), table_name='users')
+    op.drop_table('users')
+```
+
+### Step 5: Apply Migration
+
+```bash
+alembic upgrade head
+```
+
+### Step 6: Verify
+
+```bash
+# Check current version
+alembic current
+
+# Verify in database
+psql -d memic_dev -c "\dt"
+psql -d memic_dev -c "\d users"
+```
+
+### Step 7: Test Rollback (Development Only)
+
+```bash
+# Test that rollback works
+alembic downgrade -1
+
+# Re-apply
+alembic upgrade head
+```
+
+### Step 8: Commit Changes
+
+Commit both the model and migration files together:
+
+```bash
+git add app/models/user.py
+git add alembic/versions/xxxx_add_user_model.py
+git commit -m "Add User model with email and username fields"
+```
+
+## Advanced Usage
+
+### Creating Empty Migrations
+
+For data migrations or custom changes:
+
+```bash
+alembic revision -m "seed initial data"
+```
+
+Then manually edit the migration file:
+
+```python
+def upgrade() -> None:
+    op.execute("""
+        INSERT INTO users (email, username, hashed_password)
+        VALUES ('admin@example.com', 'admin', 'hashed_password_here')
+    """)
+
+def downgrade() -> None:
+    op.execute("DELETE FROM users WHERE email = 'admin@example.com'")
+```
+
+### Branching and Merging
+
+If multiple developers create migrations simultaneously:
+
+```bash
+# Show heads
+alembic heads
+
+# Merge branches
+alembic merge -m "merge migrations" <rev1> <rev2>
+```
+
+### Migration to a Specific Version
+
+```bash
+# Upgrade to specific version
+alembic upgrade <revision_id>
+
+# Downgrade to specific version
+alembic downgrade <revision_id>
+```
+
+### Show SQL Without Executing
+
+```bash
+# Show SQL for upgrade
+alembic upgrade head --sql
+
+# Show SQL for downgrade
+alembic downgrade -1 --sql
+```
+
+## Best Practices
+
+### DO
+
+- Always use Alembic for schema changes
+- Review autogenerated migrations before applying
+- Test migrations in development first
+- Write descriptive migration messages
+- Keep migrations small and focused
+- Implement both upgrade() and downgrade()
+- Test rollback functionality
+- Commit model and migration together
+- Document complex migrations
+
+### DO NOT
+
+- Never edit applied migrations
+- Never use `Base.metadata.create_all()` in production
+- Never make direct database changes with SQL
+- Never skip reviewing autogenerated migrations
+- Never delete migration files
+- Never commit without testing migrations
+- Never use migrations for complex data transformations without testing
+
+## Troubleshooting
+
+### Migration Out of Sync
+
+If your database is out of sync with migrations:
+
+```bash
+# Check current state
+alembic current
+
+# Show what Alembic thinks should exist
+alembic history --verbose
+
+# Force stamp to a specific version (use with caution)
+alembic stamp head
+```
+
+### Autogenerate Missed Changes
+
+If autogenerate doesn't detect your changes:
+
+1. Ensure model is imported in `app/models/__init__.py`
+2. Ensure model imports are in `alembic/env.py`
+3. Check that model inherits from `Base`
+4. Verify model `__tablename__` is set
+
+### Production Migration Failed
+
+If a migration fails in production:
+
+1. Check the error message
+2. Rollback: `alembic downgrade -1`
+3. Fix the migration
+4. Test in development
+5. Deploy the fixed migration
+
+## Database Backup
+
+Before running migrations in production:
+
+```bash
+# Backup database
+pg_dump -U punithg -d memic_prod > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# Run migration
+alembic upgrade head
+
+# If needed, restore
+psql -U punithg -d memic_prod < backup_20250119_120000.sql
+```
+
+## Configuration
+
+### Database URL
+
+Alembic uses the database URL from `app/config.py`:
+
+```python
+# app/config.py
+database_url: str = Field(default="postgresql+psycopg://punithg@localhost:5432/memic_dev", env="DATABASE_URL")
+```
+
+### Environment-Specific Migrations
+
+Use environment variables to point to different databases:
+
+```bash
+# Development
+export DATABASE_URL="postgresql+psycopg://punithg@localhost:5432/memic_dev"
+alembic upgrade head
+
+# Production
+export DATABASE_URL="postgresql+psycopg://user:pass@prod-host:5432/memic_prod"
+alembic upgrade head
+```
+
+## Additional Resources
+
+- [Alembic Documentation](https://alembic.sqlalchemy.org/)
+- [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
+- [Database Migration Best Practices](https://www.braintreepayments.com/blog/safe-database-migration-patterns/)
+
+## Support
+
+For questions or issues with migrations:
+1. Check this documentation
+2. Review Alembic logs
+3. Consult the team lead
+4. Check the Alembic documentation
+

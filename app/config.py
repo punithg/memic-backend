@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     app_env: Literal["dev", "uat", "prod"] = Field(default="dev", env="APP_ENV")
     
     # Database settings
-    database_url: str = Field(default="postgresql://user:password@localhost/memic_db", env="DATABASE_URL")
+    database_url: str = Field(default="postgresql+psycopg://punithg@localhost:5432/memic_dev", env="DATABASE_URL")
     
     # Application settings
     app_name: str = Field(default="Memic Backend", env="APP_NAME")
