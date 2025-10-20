@@ -150,3 +150,65 @@ updated_at = Column(
 - All RAG data should be scoped to project_id for complete isolation
 - User → Organization → Project hierarchy (3-tier like mem0)
 - Use UserOrganization table for RBAC with roles: owner, admin, member
+
+## API Documentation with Postman
+
+### Postman Collection Maintenance (MANDATORY)
+- **ALWAYS** update the Postman collection when adding, modifying, or removing API endpoints
+- The Postman collection file is located at: `memic-backend.postman_collection.json`
+- Keep the collection synchronized with the actual API implementation
+
+### When to Update Postman Collection
+1. **New Endpoint Added**: Add corresponding request to appropriate folder in collection
+2. **Endpoint Modified**: Update request URL, method, body, or parameters
+3. **Endpoint Removed**: Remove the request from collection
+4. **New Controller/Module**: Create a new folder in the collection
+5. **Response Model Changed**: Update example responses and descriptions
+
+### Postman Collection Update Checklist
+- [ ] Added/updated endpoint request in appropriate folder
+- [ ] Set correct HTTP method (GET, POST, PUT, DELETE, etc.)
+- [ ] Added/updated request body with proper JSON schema
+- [ ] Added/updated path parameters and query parameters
+- [ ] Configured Bearer token authentication if endpoint requires auth
+- [ ] Added clear description explaining what the endpoint does
+- [ ] Added test scripts to auto-save important IDs (user_id, org_id, project_id, etc.)
+- [ ] Updated collection variables if new IDs need to be tracked
+- [ ] Verified the endpoint works by testing in Postman
+
+### Postman Collection Structure
+```
+memic-backend/
+├── Health/
+├── Authentication/
+├── Users/
+├── Organizations/
+├── Projects/
+├── Members/
+└── [New Module]/  <- Add new folders for new modules
+```
+
+### Best Practices for Postman Entries
+- Use descriptive names for requests (e.g., "Create Organization" not just "Create")
+- Group related endpoints in folders by resource/module
+- Use collection variables: `{{base_url}}`, `{{access_token}}`, `{{org_id}}`, `{{project_id}}`, `{{user_id}}`
+- Add test scripts to auto-save tokens and IDs from responses
+- Include example request bodies with realistic data
+- Add comprehensive descriptions for each endpoint
+- Keep authentication consistent (Bearer token in Authorization header)
+
+### Auto-Save Script Template
+For endpoints that return important IDs or tokens, add this test script:
+```javascript
+if (pm.response.code === 201 || pm.response.code === 200) {
+    const response = pm.response.json();
+    pm.collectionVariables.set('variable_name', response.field_name);
+    console.log('Variable saved:', response.field_name);
+}
+```
+
+### Before Merging to Main/Master
+- **VERIFY** all API changes are reflected in Postman collection
+- **TEST** the updated collection to ensure all requests work
+- **COMMIT** Postman collection updates with API code changes
+- Postman collection should be ready for team use immediately after merge
