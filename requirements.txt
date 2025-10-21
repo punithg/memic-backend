@@ -10,3 +10,13 @@ bcrypt==4.1.2
 python-multipart==0.0.6
 email-validator==2.1.1
 
+# RAG System Dependencies
+celery[redis]==5.3.4
+redis==4.5.4
+boto3==1.34.14
+pinecone-client==5.0.1
+# tiktoken==0.5.2  # Skipped for Phase 1 - requires Rust compiler on Python 3.14
+python-magic==0.4.27
+supabase==2.3.0
+azure-storage-blob==12.19.0
+

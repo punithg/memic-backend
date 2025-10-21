@@ -29,7 +29,7 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 # Import all models here to ensure they are registered with Base.metadata
-from app.models import User, Organization, Project, UserOrganization
+from app.models import User, Organization, Project, UserOrganization, File, FileChunk
 
 target_metadata = Base.metadata
 

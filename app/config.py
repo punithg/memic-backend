@@ -35,6 +35,33 @@ class Settings(BaseSettings):
     stripe_secret_key: Optional[str] = Field(default=None, env="STRIPE_SECRET_KEY")
     sendgrid_api_key: Optional[str] = Field(default=None, env="SENDGRID_API_KEY")
     
+    # Supabase Storage Configuration
+    supabase_url: Optional[str] = Field(default=None, env="SUPABASE_URL")
+    supabase_key: Optional[str] = Field(default=None, env="SUPABASE_KEY")
+    supabase_bucket_name: str = Field(default="memic-documents", env="SUPABASE_BUCKET_NAME")
+    
+    # Azure Blob Storage Configuration (Alternative)
+    azure_storage_connection_string: Optional[str] = Field(default=None, env="AZURE_STORAGE_CONNECTION_STRING")
+    azure_storage_container_name: str = Field(default="memic-documents", env="AZURE_STORAGE_CONTAINER_NAME")
+    
+    # Pinecone Configuration
+    pinecone_api_key: Optional[str] = Field(default=None, env="PINECONE_API_KEY")
+    pinecone_environment: str = Field(default="gcp-starter", env="PINECONE_ENVIRONMENT")
+    pinecone_index_name: str = Field(default="memic-rag", env="PINECONE_INDEX_NAME")
+    
+    # Redis Configuration
+    redis_url: str = Field(default="redis://localhost:6379/0", env="REDIS_URL")
+    
+    # Celery Configuration
+    celery_broker_url: str = Field(default="redis://localhost:6379/0", env="CELERY_BROKER_URL")
+    celery_result_backend: str = Field(default="redis://localhost:6379/0", env="CELERY_RESULT_BACKEND")
+    
+    # RAG Processing Configuration
+    chunk_size: int = Field(default=512, env="CHUNK_SIZE")
+    chunk_overlap: int = Field(default=50, env="CHUNK_OVERLAP")
+    embedding_model: str = Field(default="text-embedding-ada-002", env="EMBEDDING_MODEL")
+    embedding_dimension: int = Field(default=1536, env="EMBEDDING_DIMENSION")
+    
     # Environment-specific settings
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
     cors_origins: str = Field(default="*", env="CORS_ORIGINS")
@@ -79,6 +106,7 @@ class Settings(BaseSettings):
         return self.app_env == "dev"
     
     class Config:
+        env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
 

@@ -720,6 +720,287 @@
 				}
 			],
 			"description": "Organization member management endpoints"
+		},
+		{
+			"name": "Files",
+			"item": [
+				{
+					"name": "Upload File",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('file_id', response.id);",
+									"    console.log('File ID saved:', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/{{project_id}}/files",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id}}",
+								"files"
+							]
+						},
+						"description": "Upload a file to a project and initiate RAG processing pipeline"
+					},
+					"response": []
+				},
+				{
+					"name": "List Files",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/{{project_id}}/files?page=1&page_size=50",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id}}",
+								"files"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "page_size",
+									"value": "50"
+								},
+								{
+									"key": "status",
+									"value": "READY",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get a paginated list of files in a project"
+					},
+					"response": []
+				},
+				{
+					"name": "Get File Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/{{project_id}}/files/{{file_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id}}",
+								"files",
+								"{{file_id}}"
+							]
+						},
+						"description": "Get detailed information about a file including metadata"
+					},
+					"response": []
+				},
+				{
+					"name": "Get File Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/{{project_id}}/files/{{file_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id}}",
+								"files",
+								"{{file_id}}",
+								"status"
+							]
+						},
+						"description": "Get detailed processing status and progress for a file"
+					},
+					"response": []
+				},
+				{
+					"name": "Update File Metadata",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"metadata\": {\n        \"category\": \"contracts\",\n        \"department\": \"legal\",\n        \"priority\": \"high\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/{{project_id}}/files/{{file_id}}/metadata",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id}}",
+								"files",
+								"{{file_id}}",
+								"metadata"
+							]
+						},
+						"description": "Update or create custom metadata for a file"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete File",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/{{project_id}}/files/{{file_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id}}",
+								"files",
+								"{{file_id}}"
+							]
+						},
+						"description": "Delete a file from storage, vector database, and database"
+					},
+					"response": []
+				},
+				{
+					"name": "Semantic Search",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"What are the main contract terms?\",\n    \"top_k\": 10\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/{{project_id}}/files/search",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id}}",
+								"files",
+								"search"
+							]
+						},
+						"description": "Search for similar content across all files in a project (Phase 1 stub)"
+					},
+					"response": []
+				}
+			],
+			"description": "File upload and RAG operations"
 		}
 	],
 	"variable": [
@@ -745,6 +1026,11 @@
 		},
 		{
 			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "file_id",
 			"value": "",
 			"type": "string"
 		}

@@ -10,6 +10,18 @@ from app.dtos.organization_dto import (
 )
 from app.dtos.project_dto import ProjectCreate, ProjectUpdate, ProjectResponse
 from app.dtos.member_dto import MemberAdd, MemberUpdate, MemberResponse, MemberListResponse
+from app.dtos.file_dto import (
+    FileUploadResponseDTO,
+    FileStatusResponseDTO,
+    FileListItemDTO,
+    FileListResponseDTO,
+    FileMetadataRequestDTO,
+    FileMetadataResponseDTO,
+    FileSearchRequestDTO,
+    FileChunkResultDTO,
+    FileSearchResultDTO,
+    FileDetailResponseDTO
+)
 
 __all__ = [
     "SignupRequest",
@@ -28,5 +40,15 @@ __all__ = [
     "MemberUpdate",
     "MemberResponse",
     "MemberListResponse",
+    "FileUploadResponseDTO",
+    "FileStatusResponseDTO",
+    "FileListItemDTO",
+    "FileListResponseDTO",
+    "FileMetadataRequestDTO",
+    "FileMetadataResponseDTO",
+    "FileSearchRequestDTO",
+    "FileChunkResultDTO",
+    "FileSearchResultDTO",
+    "FileDetailResponseDTO",
 ]
 
