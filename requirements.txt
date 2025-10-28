@@ -20,3 +20,6 @@ python-magic==0.4.27
 supabase==2.3.0
 azure-storage-blob==12.19.0
 
+# File Conversion Dependencies
+openpyxl==3.1.2  # Excel file handling and preprocessing
+

@@ -29,33 +29,33 @@ def process_file_pipeline_task(self, file_id: str, project_id: str):
         from app.tasks.parsing_tasks import parse_file_task
         from app.tasks.chunking_tasks import chunk_file_task
         from app.tasks.embedding_tasks import embed_chunks_task
+        from app.tasks.file_converter import needs_conversion
+        from app.repositories.project_repository import ProjectRepository
         
-        # Check if conversion is needed
+        # Get file and project info
         db = SessionLocal()
         try:
             file_repo = FileRepository(db)
-            file = file_repo.get(UUID(file_id))
+            project_repo = ProjectRepository(db)
             
+            file = file_repo.get(UUID(file_id))
             if not file:
                 raise ValueError(f"File {file_id} not found")
             
-            # Build task chain based on file requirements
+            project = project_repo.get(UUID(project_id))
+            if not project:
+                raise ValueError(f"Project {project_id} not found")
+            
+            org_id = str(project.organization_id)
+            
+            # Build task chain - always run conversion task (it will skip if not needed)
             # Use si() (signature immutable) so tasks ignore previous results
-            if file.mime_type.endswith('pdf'):
-                # PDF doesn't need conversion
-                task_chain = chain(
-                    parse_file_task.si(file_id, project_id),
-                    chunk_file_task.si(file_id, project_id),
-                    embed_chunks_task.si(file_id, project_id)
-                )
-            else:
-                # Other files need conversion first
-                task_chain = chain(
-                    convert_file_task.si(file_id, project_id),
-                    parse_file_task.si(file_id, project_id),
-                    chunk_file_task.si(file_id, project_id),
-                    embed_chunks_task.si(file_id, project_id)
-                )
+            task_chain = chain(
+                convert_file_task.si(file_id, org_id, project_id),
+                parse_file_task.si(file_id, project_id),
+                chunk_file_task.si(file_id, project_id),
+                embed_chunks_task.si(file_id, project_id)
+            )
             
             # Execute the chain
             result = task_chain.apply_async()

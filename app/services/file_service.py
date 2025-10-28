@@ -117,7 +117,12 @@ class FileService:
             
             # Trigger RAG processing pipeline asynchronously
             logger.info(f"Triggering RAG pipeline for file {new_file.id}")
-            process_file_pipeline_task.delay(str(new_file.id), str(project_id))
+            try:
+                task_result = process_file_pipeline_task.delay(str(new_file.id), str(project_id))
+                logger.info(f"Task queued successfully! Task ID: {task_result.id}")
+            except Exception as task_error:
+                logger.error(f"Failed to queue task: {task_error}", exc_info=True)
+                # Don't fail the upload, but log the error
             
             return FileUploadResponseDTO.model_validate(new_file)
             
@@ -439,7 +444,12 @@ class FileService:
             
             # Trigger RAG processing pipeline asynchronously
             logger.info(f"Triggering RAG pipeline for file {file_id}")
-            process_file_pipeline_task.delay(str(file_id), str(project_id))
+            try:
+                task_result = process_file_pipeline_task.delay(str(file_id), str(project_id))
+                logger.info(f"Task queued successfully! Task ID: {task_result.id}")
+            except Exception as task_error:
+                logger.error(f"Failed to queue task: {task_error}", exc_info=True)
+                # Don't fail the upload, but log the error
             
             # Refresh to get updated status
             self.db.refresh(file)

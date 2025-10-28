@@ -725,7 +725,96 @@
 			"name": "Files",
 			"item": [
 				{
-					"name": "Upload File",
+					"name": "Initialize File Upload (Presigned URL)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('file_id', response.file_id);",
+									"    pm.collectionVariables.set('upload_url', response.upload_url);",
+									"    console.log('File ID saved:', response.file_id);",
+									"    console.log('Upload URL saved');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filename\": \"document.pdf\",\n    \"size\": 1024000,\n    \"mime_type\": \"application/pdf\",\n    \"metadata\": {\n        \"category\": \"legal\",\n        \"priority\": \"high\",\n        \"department\": \"contracts\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/{{project_id}}/files/init",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id}}",
+								"files",
+								"init"
+							]
+						},
+						"description": "Get a presigned URL for direct upload to Azure Blob Storage. Recommended for large files (>10MB) to avoid proxy overhead."
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm File Upload",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/{{project_id}}/files/{{file_id}}/confirm",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id}}",
+								"files",
+								"{{file_id}}",
+								"confirm"
+							]
+						},
+						"description": "Confirm that file upload to presigned URL is complete and trigger RAG processing pipeline"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload File (Multipart - Legacy)",
 					"event": [
 						{
 							"listen": "test",
@@ -775,7 +864,7 @@
 								"files"
 							]
 						},
-						"description": "Upload a file to a project and initiate RAG processing pipeline"
+						"description": "Upload a file via multipart/form-data through the server. Use for small files (<10MB). For large files, use presigned URL approach."
 					},
 					"response": []
 				},
@@ -929,6 +1018,60 @@
 					"response": []
 				},
 				{
+					"name": "Get Download URL",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('download_url', response.download_url);",
+									"    console.log('Download URL saved');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/projects/{{project_id}}/files/{{file_id}}/download-url?expiry=3600",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id}}",
+								"files",
+								"{{file_id}}",
+								"download-url"
+							],
+							"query": [
+								{
+									"key": "expiry",
+									"value": "3600",
+									"description": "URL expiry in seconds (default: 3600, max: 86400)"
+								}
+							]
+						},
+						"description": "Get a presigned URL for downloading the file from Azure Blob Storage. URL is temporary and secure."
+					},
+					"response": []
+				},
+				{
 					"name": "Delete File",
 					"request": {
 						"auth": {
@@ -1031,6 +1174,16 @@
 		},
 		{
 			"key": "file_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "upload_url",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "download_url",
 			"value": "",
 			"type": "string"
 		}
