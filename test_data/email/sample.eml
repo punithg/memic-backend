@@ -1,0 +1,18 @@
+From: sender@example.com
+To: recipient@example.com
+Subject: Test Email for RAG Pipeline
+Date: Mon, 28 Oct 2024 12:00:00 -0000
+Content-Type: text/plain; charset=UTF-8
+
+This is a test email message for the RAG pipeline testing.
+
+It contains multiple paragraphs to test email parsing functionality.
+
+The email parser should extract:
+- From/To addresses
+- Subject line
+- Date
+- Body content
+
+Best regards,
+Test Sender

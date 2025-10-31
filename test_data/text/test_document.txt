@@ -1,0 +1,50 @@
+Memic RAG Pipeline Test Document
+=================================
+
+# Introduction
+This document is designed to test the Memic RAG (Retrieval-Augmented Generation) pipeline.
+
+## Purpose
+The purpose of this document is to verify:
+1. File conversion to PDF format
+2. Document parsing and content extraction
+3. Semantic chunking of content
+4. Vector embedding generation
+5. Storage in Azure Blob Storage
+
+## Test Content
+
+### Section 1: Sample Text
+The quick brown fox jumps over the lazy dog. This pangram contains every letter of the English alphabet at least once, making it useful for testing typography and text processing systems.
+
+### Section 2: Technical Information
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+### Section 3: Business Context
+Memic.ai provides a robust RAG system that helps developers implement semantic search capabilities. Our meticulously designed RAG pipeline serves industries like Law, Finance, and Healthcare by enabling them to store and retrieve business context effectively.
+
+## Features to Test
+
+### File Formats Supported
+- Text files (TXT, MD)
+- Microsoft Office (DOCX, DOC, XLS, XLSX, PPT, PPTX)
+- PDF documents
+- Images (PNG, JPG, JPEG)
+- Audio files (MP3, WAV, M4A, FLAC, OGG, AAC)
+- Email files (EML, MSG)
+
+### Processing Pipeline
+1. **Upload**: File is uploaded to Azure Blob Storage
+2. **Conversion**: Documents are converted to PDF if needed (using LibreOffice)
+3. **Parsing**: Content is extracted and structured
+4. **Chunking**: Document is broken into semantic chunks
+5. **Embedding**: Each chunk is converted to vector embeddings
+6. **Ready**: File is indexed and ready for retrieval
+
+## Conclusion
+This test document contains enough content to verify that all stages of the RAG pipeline are functioning correctly. The document includes headings, lists, paragraphs, and technical terminology that should be properly processed by the system.
+
+---
+Test ID: TEST-001
+Created: 2025-10-28
+Version: 1.0

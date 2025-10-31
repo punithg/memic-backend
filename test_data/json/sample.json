@@ -1,0 +1,199 @@
+{
+  "document_type": "technical_specification",
+  "title": "Memic RAG Pipeline Architecture",
+  "version": "1.0.0",
+  "created_at": "2024-10-28T00:00:00Z",
+  "author": {
+    "name": "Test Author",
+    "email": "test@memic.ai",
+    "department": "Engineering"
+  },
+  "summary": "This document describes the architecture and implementation details of the Memic RAG (Retrieval-Augmented Generation) pipeline system.",
+  "sections": [
+    {
+      "id": 1,
+      "title": "System Overview",
+      "content": "The RAG pipeline is a multi-stage document processing system that converts various file formats into searchable, embeddable content. It consists of four main stages: file conversion, parsing, chunking, and embedding generation.",
+      "subsections": [
+        {
+          "title": "Key Features",
+          "items": [
+            "Support for multiple file formats (PDF, DOCX, XLSX, images, audio)",
+            "Automatic file format detection and conversion",
+            "Intelligent document parsing with metadata extraction",
+            "Smart chunking with semantic boundaries",
+            "Vector embedding generation for semantic search"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Pipeline Stages",
+      "content": "Each file goes through a series of processing stages, tracked via database status updates.",
+      "stages": [
+        {
+          "name": "File Conversion",
+          "description": "Converts files to standardized formats using LibreOffice",
+          "input_formats": ["DOC", "DOCX", "XLS", "PPT", "JPG", "PNG", "TXT"],
+          "output_format": "PDF",
+          "status_codes": ["CONVERSION_STARTED", "CONVERSION_COMPLETE", "CONVERSION_FAILED"]
+        },
+        {
+          "name": "Parsing",
+          "description": "Extracts text and metadata from documents",
+          "supported_formats": ["PDF", "XLSX", "PPTX", "JSON", "EML", "MSG"],
+          "output": "Enriched JSON with extracted content and metadata",
+          "status_codes": ["PARSING_STARTED", "PARSING_COMPLETE", "PARSING_FAILED"]
+        },
+        {
+          "name": "Chunking",
+          "description": "Splits documents into semantic chunks for processing",
+          "chunk_size": 1000,
+          "overlap": 200,
+          "strategy": "semantic_boundary_detection",
+          "status_codes": ["CHUNKING_STARTED", "CHUNKING_COMPLETE", "CHUNKING_FAILED"]
+        },
+        {
+          "name": "Embedding",
+          "description": "Generates vector embeddings for semantic search",
+          "model": "text-embedding-3-small",
+          "dimension": 1536,
+          "vector_store": "Pinecone",
+          "status_codes": ["EMBEDDING_STARTED", "EMBEDDING_COMPLETE", "EMBEDDING_FAILED"]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Technology Stack",
+      "components": {
+        "backend": {
+          "framework": "FastAPI",
+          "language": "Python 3.14",
+          "async_support": true
+        },
+        "task_queue": {
+          "system": "Celery",
+          "broker": "Redis",
+          "result_backend": "Redis",
+          "queues": ["files", "conversion", "parsing", "chunking", "embedding"]
+        },
+        "storage": {
+          "type": "Azure Blob Storage",
+          "container": "memic-uat",
+          "hierarchy": "organization/project/file/stage/"
+        },
+        "database": {
+          "system": "PostgreSQL",
+          "orm": "SQLAlchemy",
+          "migrations": "Alembic"
+        },
+        "conversion": {
+          "tool": "LibreOffice",
+          "version": "25.8.2.2",
+          "mode": "headless"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "API Endpoints",
+      "endpoints": [
+        {
+          "path": "/api/v1/projects/{project_id}/files/init",
+          "method": "POST",
+          "description": "Initialize file upload with presigned URL",
+          "authentication": "Bearer Token",
+          "response": {
+            "file_id": "uuid",
+            "upload_url": "https://..."
+          }
+        },
+        {
+          "path": "/api/v1/projects/{project_id}/files/{file_id}/confirm",
+          "method": "POST",
+          "description": "Confirm upload and trigger RAG pipeline",
+          "triggers": "Celery task chain"
+        },
+        {
+          "path": "/api/v1/projects/{project_id}/files/{file_id}/status",
+          "method": "GET",
+          "description": "Get file processing status",
+          "returns": "Current pipeline stage and progress"
+        },
+        {
+          "path": "/api/v1/projects/{project_id}/files/{file_id}",
+          "method": "GET",
+          "description": "Get complete file details with metadata"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Performance Metrics",
+      "benchmarks": {
+        "average_processing_times": {
+          "small_text_file": "2-3 seconds",
+          "document_50_pages": "10-15 seconds",
+          "large_pdf_200_pages": "45-60 seconds",
+          "audio_file_30_min": "120-180 seconds"
+        },
+        "throughput": {
+          "concurrent_files": 12,
+          "worker_count": 12,
+          "queue_optimization": "Dedicated queues per stage"
+        }
+      }
+    }
+  ],
+  "test_results": {
+    "total_tests": 50,
+    "passed": 48,
+    "failed": 2,
+    "success_rate": 96.0,
+    "test_categories": [
+      {
+        "category": "File Conversion",
+        "tests": 15,
+        "passed": 15,
+        "formats_tested": ["TXT", "DOCX", "DOC", "XLS", "PPT", "JPG", "PNG"]
+      },
+      {
+        "category": "Parsing",
+        "tests": 12,
+        "passed": 12,
+        "formats_tested": ["PDF", "XLSX", "PPTX", "JSON"]
+      },
+      {
+        "category": "Chunking",
+        "tests": 10,
+        "passed": 10,
+        "strategies_tested": ["fixed_size", "semantic_boundary"]
+      },
+      {
+        "category": "Embedding",
+        "tests": 8,
+        "passed": 6,
+        "issues": ["Rate limiting on embedding API", "Vector store connection timeout"]
+      },
+      {
+        "category": "End-to-End",
+        "tests": 5,
+        "passed": 5,
+        "scenarios_tested": ["Single file", "Batch upload", "Large files", "Error recovery"]
+      }
+    ]
+  },
+  "metadata": {
+    "tags": ["RAG", "document-processing", "embeddings", "vector-search"],
+    "classification": "internal",
+    "version_history": [
+      {
+        "version": "1.0.0",
+        "date": "2024-10-28",
+        "changes": "Initial release with full pipeline implementation"
+      }
+    ]
+  }
+}
