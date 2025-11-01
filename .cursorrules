@@ -212,3 +212,43 @@ if (pm.response.code === 201 || pm.response.code === 200) {
 - **TEST** the updated collection to ensure all requests work
 - **COMMIT** Postman collection updates with API code changes
 - Postman collection should be ready for team use immediately after merge
+
+## B2B Configuration Standards
+
+### Feature Flag Requirements
+- **ALWAYS** make AI/ML services configurable with feature flags
+- **ALWAYS** add cost-control switches for paid APIs (Azure AFR, OpenAI, LlamaParse, etc.)
+- **NEVER** hard-code service selection - use environment variables
+- **ALWAYS** provide graceful degradation when features are disabled
+- Document cost implications of each feature in code comments
+
+### Configuration Best Practices
+- Use environment variables for all external service configuration
+- Provide sensible defaults that minimize costs in development
+- Use feature flags to enable/disable expensive operations:
+  - LLM-based enrichment
+  - Premium parsing services
+  - Advanced AI features
+- Log when features are disabled due to configuration
+- Fail gracefully when required services are unavailable
+
+### Cost-Aware Architecture
+- Each feature that incurs cost should have:
+  - Environment variable to enable/disable
+  - Documentation of cost per operation
+  - Alternative low-cost or free fallback
+  - Usage metrics/logging for cost tracking
+- Design for multi-tenancy cost allocation
+- Enable customers to control their own feature usage
+
+### Feature Flag Naming Convention
+```bash
+# Format: ENABLE_<FEATURE_NAME>
+ENABLE_LLM_ENRICHMENT=true
+ENABLE_ADVANCED_TABLE_EXTRACTION=false
+ENABLE_PREMIUM_PARSING=false
+
+# Service Selection Format: <MODULE>_SERVICE
+PARSING_SERVICE=azure_form_recognizer
+EMBEDDING_SERVICE=openai
+```

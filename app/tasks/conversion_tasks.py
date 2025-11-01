@@ -90,11 +90,12 @@ def convert_file_task(self, file_id: str, org_id: str, project_id: str) -> Dict[
                 db.commit()
             
             logger.info(f"File {filename} marked as conversion complete (skipped)")
-            
-            # TODO: Chain to parsing task here
-            # from app.tasks.parsing_tasks import parse_file_task
-            # parse_file_task.delay(file_id, org_id, project_id)
-            
+
+            # Chain to parsing task
+            from app.tasks.parsing_tasks import parse_file_task
+            parse_file_task.delay(file_id, org_id, project_id)
+            logger.info(f"Triggered parsing task for file {file_id}")
+
             return {
                 "file_id": file_id,
                 "status": "conversion_complete",
@@ -150,11 +151,12 @@ def convert_file_task(self, file_id: str, org_id: str, project_id: str) -> Dict[
             db.commit()
         
         logger.info(f"File {filename} converted successfully to {pdf_filename}")
-        
-        # TODO: Chain to parsing task here
-        # from app.tasks.parsing_tasks import parse_file_task
-        # parse_file_task.delay(file_id, org_id, project_id)
-        
+
+        # Chain to parsing task
+        from app.tasks.parsing_tasks import parse_file_task
+        parse_file_task.delay(file_id, org_id, project_id)
+        logger.info(f"Triggered parsing task for file {file_id}")
+
         return {
             "file_id": file_id,
             "status": "conversion_complete",

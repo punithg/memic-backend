@@ -23,3 +23,7 @@ azure-storage-blob==12.19.0
 # File Conversion Dependencies
 openpyxl==3.1.2  # Excel file handling and preprocessing
 
+# Document Parsing Dependencies
+azure-ai-formrecognizer==3.3.3  # Azure Form Recognizer for document parsing
+openai==1.54.4  # OpenAI for optional LLM enrichment
+
