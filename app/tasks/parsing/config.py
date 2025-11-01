@@ -3,17 +3,18 @@ Configuration for parsing module.
 
 This module manages all configuration for document parsing with feature flags
 for cost control in a B2B environment.
+
+This module imports settings from the main app.config to ensure centralized
+configuration management.
 """
 
-import os
 from typing import Literal
+from app.config import settings
 
 # Parsing Service Selection
 # Cost: Azure Form Recognizer ~$1.50 per 1000 pages
 # Future: Support for LlamaParse, AWS Textract, etc.
-PARSING_SERVICE: Literal["azure_form_recognizer"] = os.getenv(
-    "PARSING_SERVICE", "azure_form_recognizer"
-)
+PARSING_SERVICE: Literal["azure_form_recognizer"] = settings.parsing_service
 
 # Feature Flags for Cost Control
 # Each flag controls a feature that incurs additional costs
@@ -21,34 +22,30 @@ PARSING_SERVICE: Literal["azure_form_recognizer"] = os.getenv(
 # LLM Enrichment: Uses OpenAI to extract metadata (document type, summary, tags)
 # Cost: ~$0.002 per document with gpt-4o-mini
 # When disabled: Returns empty headers dict
-ENABLE_LLM_ENRICHMENT: bool = os.getenv("ENABLE_LLM_ENRICHMENT", "false").lower() == "true"
+ENABLE_LLM_ENRICHMENT: bool = settings.enable_llm_enrichment
 
 # Advanced Table Extraction: Uses premium AFR features for complex tables
 # Cost: May incur additional AFR costs
 # When disabled: Uses standard table extraction
-ENABLE_ADVANCED_TABLE_EXTRACTION: bool = (
-    os.getenv("ENABLE_ADVANCED_TABLE_EXTRACTION", "false").lower() == "true"
-)
+ENABLE_ADVANCED_TABLE_EXTRACTION: bool = settings.enable_advanced_table_extraction
 
 # Section Hierarchy Extraction: Extracts document structure (headings, levels)
 # Cost: Additional processing time and AFR API calls
 # When disabled: Returns flat section list
-ENABLE_SECTION_HIERARCHY: bool = (
-    os.getenv("ENABLE_SECTION_HIERARCHY", "false").lower() == "true"
-)
+ENABLE_SECTION_HIERARCHY: bool = settings.enable_section_hierarchy
 
 # Azure Form Recognizer Configuration
-AZURE_AFR_ENDPOINT: str = os.getenv("AZURE_AFR_ENDPOINT", "")
-AZURE_AFR_API_KEY: str = os.getenv("AZURE_AFR_API_KEY", "")
+AZURE_AFR_ENDPOINT: str = settings.azure_afr_endpoint or ""
+AZURE_AFR_API_KEY: str = settings.azure_afr_api_key or ""
 
 # LLM Configuration (for enrichment)
-OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
-OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")  # Cost-effective choice
+OPENAI_API_KEY: str = settings.openai_api_key or ""
+OPENAI_MODEL: str = "gpt-4o-mini"  # Cost-effective choice (can be added to main config if needed)
 
 # Parsing Timeouts (in seconds)
-AFR_POLLING_TIMEOUT: int = int(os.getenv("AFR_POLLING_TIMEOUT", "120"))
-AFR_RETRY_ATTEMPTS: int = int(os.getenv("AFR_RETRY_ATTEMPTS", "3"))
-AFR_RETRY_DELAY: int = int(os.getenv("AFR_RETRY_DELAY", "2"))
+AFR_POLLING_TIMEOUT: int = settings.afr_polling_timeout
+AFR_RETRY_ATTEMPTS: int = settings.afr_retry_attempts
+AFR_RETRY_DELAY: int = settings.afr_retry_delay
 
 
 def validate_config() -> dict[str, bool]:

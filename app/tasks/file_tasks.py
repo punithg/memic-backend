@@ -52,7 +52,7 @@ def process_file_pipeline_task(self, file_id: str, project_id: str):
             # Use si() (signature immutable) so tasks ignore previous results
             task_chain = chain(
                 convert_file_task.si(file_id, org_id, project_id),
-                parse_file_task.si(file_id, project_id),
+                parse_file_task.si(file_id, org_id, project_id),
                 chunk_file_task.si(file_id, project_id),
                 embed_chunks_task.si(file_id, project_id)
             )

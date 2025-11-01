@@ -44,6 +44,30 @@ class Settings(BaseSettings):
     azure_storage_connection_string: Optional[str] = Field(default=None, env="AZURE_STORAGE_CONNECTION_STRING")
     azure_storage_container_name: str = Field(default="memic-documents", env="AZURE_STORAGE_CONTAINER_NAME")
     
+    # File Conversion Configuration
+    libreoffice_path: str = Field(
+        default="/Applications/LibreOffice.app/Contents/MacOS/soffice",
+        env="LIBREOFFICE_PATH",
+        description="Path to LibreOffice soffice executable for file conversion"
+    )
+
+    # Azure Form Recognizer / Document Intelligence Configuration
+    azure_afr_endpoint: Optional[str] = Field(default=None, env="AZURE_AFR_ENDPOINT")
+    azure_afr_api_key: Optional[str] = Field(default=None, env="AZURE_AFR_API_KEY")
+
+    # Parsing Service Configuration
+    parsing_service: Literal["azure_form_recognizer"] = Field(default="azure_form_recognizer", env="PARSING_SERVICE")
+    
+    # Azure Form Recognizer Timeout and Retry Settings
+    afr_polling_timeout: int = Field(default=120, env="AFR_POLLING_TIMEOUT")
+    afr_retry_attempts: int = Field(default=3, env="AFR_RETRY_ATTEMPTS")
+    afr_retry_delay: int = Field(default=2, env="AFR_RETRY_DELAY")
+    
+    # Parsing Feature Flags (for cost control)
+    enable_llm_enrichment: bool = Field(default=False, env="ENABLE_LLM_ENRICHMENT")
+    enable_advanced_table_extraction: bool = Field(default=False, env="ENABLE_ADVANCED_TABLE_EXTRACTION")
+    enable_section_hierarchy: bool = Field(default=False, env="ENABLE_SECTION_HIERARCHY")
+    
     # Pinecone Configuration
     pinecone_api_key: Optional[str] = Field(default=None, env="PINECONE_API_KEY")
     pinecone_environment: str = Field(default="gcp-starter", env="PINECONE_ENVIRONMENT")

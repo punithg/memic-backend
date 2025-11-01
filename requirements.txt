@@ -27,3 +27,7 @@ openpyxl==3.1.2  # Excel file handling and preprocessing
 azure-ai-formrecognizer==3.3.3  # Azure Form Recognizer for document parsing
 openai==1.54.4  # OpenAI for optional LLM enrichment
 
+# HTTP client dependencies (updated for Python 3.14 compatibility)
+httpcore>=1.0.9  # Required for Python 3.14 compatibility
+httpx>=0.28.1  # Required for Python 3.14 compatibility (may conflict with supabase, but needed for openai)
+

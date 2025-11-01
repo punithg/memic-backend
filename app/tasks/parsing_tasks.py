@@ -15,7 +15,7 @@ from app.celery_app import celery_app
 from app.models.file import FileStatus
 from app.database import SessionLocal
 from app.repositories.file_repository import FileRepository
-from app.services.azure_storage import AzureStorageClient
+from app.core.storage import get_storage_client
 
 from .parsing import PDFParser, ExcelParser, PowerPointParser
 from .parsing.utils.storage_helper import ParsingStorageHelper
@@ -26,7 +26,17 @@ logger = logging.getLogger(__name__)
 
 def run_async(coro):
     """Helper to run async functions in Celery tasks."""
-    loop = asyncio.get_event_loop()
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_closed():
+            # Loop is closed, create a new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+    except RuntimeError:
+        # No event loop in current thread, create a new one
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
     return loop.run_until_complete(coro)
 
 
@@ -111,7 +121,7 @@ def parse_file_task(self, file_id: str, org_id: str, project_id: str):
 
         # Initialize repositories and clients
         file_repo = FileRepository(db)
-        storage_client = AzureStorageClient()
+        storage_client = get_storage_client()
         storage_helper = ParsingStorageHelper(storage_client)
 
         # Get file record
@@ -127,18 +137,21 @@ def parse_file_task(self, file_id: str, org_id: str, project_id: str):
         # Determine which file to parse (converted or original)
         if file.is_converted and file.converted_file_path:
             blob_path = file.converted_file_path
-            logger.info(f"Parsing converted file: {blob_path}")
+            # Use converted filename for parser selection (e.g., sample.pdf instead of sample.docx)
+            parse_filename = blob_path.split('/')[-1]  # Get filename from path
+            logger.info(f"Parsing converted file: {blob_path} as {parse_filename}")
         else:
             blob_path = file.blob_storage_path
+            parse_filename = file.original_filename
             logger.info(f"Parsing original file: {blob_path}")
 
         # Download file from storage
         file_content = run_async(storage_helper.download_file(blob_path))
 
-        # Get appropriate parser
+        # Get appropriate parser based on actual file type
         parser = get_parser_for_file(
             file_content=file_content,
-            filename=file.original_filename,
+            filename=parse_filename,  # Use converted filename if file was converted
             document_id=file_id,
         )
 
@@ -201,7 +214,5 @@ def parse_file_task(self, file_id: str, org_id: str, project_id: str):
         raise self.retry(exc=e)
 
     finally:
-        if storage_client:
-            run_async(storage_client.close())
         db.close()
 

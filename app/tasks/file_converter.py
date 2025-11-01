@@ -13,6 +13,8 @@ import logging
 from typing import Optional, Tuple
 from pathlib import Path
 
+from app.config import settings
+
 logger = logging.getLogger(__name__)
 
 # Lazy import for openpyxl - only imported when actually needed
@@ -259,18 +261,20 @@ def convert_to_pdf_libreoffice(input_path: str, output_dir: str, is_excel: bool 
             preprocessed_path = os.path.join(output_dir, "preprocessed_" + os.path.basename(input_path))
             file_to_convert = preprocess_excel(input_path, preprocessed_path)
         
-        # Check if LibreOffice is installed
-        try:
-            soffice_path = subprocess.check_output(['which', 'soffice']).decode().strip()
-            if not soffice_path:
-                raise RuntimeError("LibreOffice (soffice) not found in PATH")
-            logger.info(f"Found LibreOffice at: {soffice_path}")
-        except subprocess.CalledProcessError:
+        # Get LibreOffice path from config
+        soffice_path = settings.libreoffice_path
+
+        # Verify LibreOffice exists at configured path
+        if not os.path.exists(soffice_path):
             raise RuntimeError(
-                "LibreOffice not found. Please install it:\n"
-                "  macOS: brew install --cask libreoffice\n"
-                "  Linux: apt-get install libreoffice"
+                f"LibreOffice not found at configured path: {soffice_path}\n"
+                "Please install LibreOffice or update LIBREOFFICE_PATH in .env:\n"
+                "  macOS default: /Applications/LibreOffice.app/Contents/MacOS/soffice\n"
+                "  Linux: /usr/bin/soffice\n"
+                "  Docker: Set LIBREOFFICE_PATH environment variable"
             )
+
+        logger.info(f"Using LibreOffice at: {soffice_path}")
         
         # Attempt conversion with retries
         max_attempts = 3
@@ -282,7 +286,7 @@ def convert_to_pdf_libreoffice(input_path: str, output_dir: str, is_excel: bool 
                 # Run LibreOffice conversion
                 process = subprocess.Popen(
                     [
-                        "soffice",
+                        soffice_path,  # Use configured path
                         "--headless",
                         "--convert-to",
                         "pdf",

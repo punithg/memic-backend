@@ -1,7 +1,7 @@
 """
 Storage helper for parsing module.
 
-Provides utilities for reading and writing files to Azure Blob Storage
+Provides utilities for reading and writing files to storage
 specifically for the parsing pipeline.
 """
 
@@ -9,7 +9,7 @@ import json
 import logging
 from typing import Any
 
-from app.services.azure_storage import AzureStorageClient
+from app.core.storage import BaseStorageClient
 
 logger = logging.getLogger(__name__)
 
@@ -17,18 +17,18 @@ logger = logging.getLogger(__name__)
 class ParsingStorageHelper:
     """Helper class for parsing-related storage operations."""
 
-    def __init__(self, storage_client: AzureStorageClient):
+    def __init__(self, storage_client: BaseStorageClient):
         """
         Initialize storage helper.
 
         Args:
-            storage_client: Azure storage client instance
+            storage_client: Storage client instance (from get_storage_client())
         """
         self.storage_client = storage_client
 
     async def download_file(self, blob_path: str) -> bytes:
         """
-        Download file from Azure Blob Storage.
+        Download file from storage.
 
         Args:
             blob_path: Path to blob in storage
@@ -52,7 +52,7 @@ class ParsingStorageHelper:
         self, enriched_json: dict[str, Any], blob_path: str
     ) -> str:
         """
-        Upload enriched JSON to Azure Blob Storage.
+        Upload enriched JSON to storage.
 
         Args:
             enriched_json: Enriched document JSON
@@ -72,7 +72,7 @@ class ParsingStorageHelper:
             logger.info(f"Uploading enriched JSON to: {blob_path}")
             await self.storage_client.upload_file(
                 file_content=json_bytes,
-                blob_name=blob_path,
+                blob_path=blob_path,
                 content_type="application/json",
             )
 

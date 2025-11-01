@@ -23,9 +23,15 @@ def run_async(coro):
     """Helper to run async code in sync context."""
     try:
         loop = asyncio.get_event_loop()
+        if loop.is_closed():
+            # Loop is closed, create a new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
     except RuntimeError:
+        # No event loop in current thread, create a new one
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
+
     return loop.run_until_complete(coro)
 
 
